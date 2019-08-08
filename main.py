@@ -34,13 +34,21 @@ chat_box = ChatBox(screen, 500,80, 600,350,u.WHITE)
 
 # Inicilizando o input_text
 
-input_text = InputText(screen, 500, 460, 400, 110, u.WHITE)
+input_text = InputText(screen, 500, 460, 400, 110, u.WHITE, "")
 
 # Inicializando o botão de enviar mensagem no chat
 
 send_mensage_button = Button("Enviar",u.WHITE, u.GREEN)
 
-send_mensage_button.draw_button(screen, 920, 490, 200, 50)
+send_mensage_button_rect = send_mensage_button.draw_button(screen, 920, 490, 200, 50)
+
+input_para_chatbox = ""
+
+def enviar_mensagem(input):
+    input_text.clean_input()
+    pygame.display.flip()
+    chat_box.add_text(0, input)
+    chat_box.update_chat_array_ui()
 
 # Recebendo toques e dinamica do jogo.
 
@@ -50,16 +58,19 @@ while not done:
         if event.type == pygame.QUIT:
             done = True
         if event.type == pygame.MOUSEBUTTONDOWN:
-
+            input_text.handle_event(event)
+            if send_mensage_button_rect.collidepoint(event.pos):
+                enviar_mensagem(input_para_chatbox)
             position_mouse = pygame.mouse.get_pos()
             print(position_mouse)
             x = position_mouse[0]
             y = position_mouse[1]
             grid.verify_position_in_matrix(x, y, screen)
         if event.type == pygame.KEYDOWN:
-            random_number = random.randint(0,1)
-            chat_box.add_text(random_number,"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-            print(len(chat_box.get_all_texts()))
-            chat_box.update_chat_array_ui()
+            input_text.handle_event(event)
+            input_para_chatbox = input_text.draw(screen)
+            pygame.display.flip()
+
+
 
 

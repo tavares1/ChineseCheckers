@@ -27,7 +27,6 @@ class ChatBox:
         for index,value in enumerate(self.chatarray):
             player,text = value
             if player == 1:
-                print(text)
                 # text vem do array e o color tbm.
                 text = (f"Jogador Vermelho: {text}")
                 render_font = self.font.render(text, True, u.RED)
@@ -35,7 +34,6 @@ class ChatBox:
                 self.screen.blit(render_font, (510,90 + (30*index)))
                 pygame.display.flip()
             else:
-                print(text)
                 # text vem do array e o color tbm.
                 text = (f"Jogador Verde: {text}")
                 render_font = self.font.render(text, True, u.GREEN)
