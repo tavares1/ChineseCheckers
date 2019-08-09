@@ -6,9 +6,11 @@ from HexCell import HexCell
 
 class Grid():
     def __init__(self):
+        self.white_spaces = []
         self.nbs = []
         self.grid = np.array([
             # Ponta verde #
+
             [HexCell(250, 90, 10, u.GREEN)],
             [HexCell(240, 110, 10, u.GREEN), HexCell(260, 110, 10, u.GREEN)],
             [HexCell(230, 130, 10, u.GREEN), HexCell(250, 130, 10, u.GREEN), HexCell(270, 130, 10, u.GREEN)],
@@ -17,13 +19,13 @@ class Grid():
             # =========== #
             [HexCell(130, 170, 10, u.WHITE), HexCell(150, 170, 10, u.WHITE), HexCell(170, 170, 10, u.WHITE),
              HexCell(190, 170, 10, u.WHITE), HexCell(210, 170, 10, u.WHITE), HexCell(230, 170, 10, u.WHITE),
-             HexCell(250, 170, 10, u.WHITE), HexCell(270, 170, 10, u.WHITE), HexCell(290, 170, 10, u.WHITE),
+             HexCell(250, 170, 10, u.WHITE), HexCell(270, 170, 10, u.WHITE), HexCell(290, 170, 10, u.RED),
              HexCell(310, 170, 10, u.WHITE), HexCell(330, 170, 10, u.WHITE), HexCell(350, 170, 10, u.WHITE),
              HexCell(370, 170, 10, u.WHITE)],
 
             [HexCell(140, 190, 10, u.WHITE), HexCell(160, 190, 10, u.WHITE), HexCell(180, 190, 10, u.WHITE),
              HexCell(200, 190, 10, u.WHITE), HexCell(220, 190, 10, u.WHITE), HexCell(240, 190, 10, u.WHITE),
-             HexCell(260, 190, 10, u.WHITE), HexCell(280, 190, 10, u.WHITE), HexCell(300, 190, 10, u.WHITE),
+             HexCell(260, 190, 10, u.WHITE), HexCell(280, 190, 10, u.RED), HexCell(300, 190, 10, u.WHITE),
              HexCell(320, 190, 10, u.WHITE), HexCell(340, 190, 10, u.WHITE), HexCell(360, 190, 10, u.WHITE)],
 
             [HexCell(150, 210, 10, u.WHITE), HexCell(170, 210, 10, u.WHITE), HexCell(190, 210, 10, u.WHITE),
@@ -38,7 +40,7 @@ class Grid():
 
             # = Meio da Estrela = #
             [HexCell(170, 250, 10, u.WHITE), HexCell(190, 250, 10, u.WHITE), HexCell(210, 250, 10, u.WHITE),
-             HexCell(230, 250, 10, u.WHITE), HexCell(250, 250, 10, u.WHITE), HexCell(270, 250, 10, u.WHITE),
+             HexCell(230, 250, 10, u.WHITE), HexCell(250, 250, 10, u.RED), HexCell(270, 250, 10, u.GREEN),
              HexCell(290, 250, 10, u.WHITE), HexCell(310, 250, 10, u.WHITE), HexCell(330, 250, 10, u.WHITE)],
             # =================== #
             [HexCell(160, 270, 10, u.WHITE),HexCell(180, 270, 10, u.WHITE),HexCell(200, 270, 10, u.WHITE)
@@ -81,10 +83,9 @@ class Grid():
                 if self.verify_inside_circle(x, y, a, b, 10) and hexcell.valid:
                         return hexcell
 
+    def get_neighborhood(self,hexcell, neighborhood, enemies):
 
-    def get_neighborhood(self,hexcell):
         (x,y) = hexcell.get_position()
-        print(x,y)
 
         right_hexted = self.get_hexcell_from_position(x+20,y)
         left_hexted = self.get_hexcell_from_position(x-20,y)
@@ -93,7 +94,55 @@ class Grid():
         bottom_left_hexted = self.get_hexcell_from_position(x - 10, y + 20)
         bottom_right_hexted = self.get_hexcell_from_position(x + 10, y + 20)
 
-        return right_hexted,left_hexted,top_left_hexted,top_right_hexted,bottom_left_hexted,bottom_right_hexted
+        hexcells = [right_hexted, left_hexted, top_left_hexted, top_right_hexted, bottom_left_hexted,
+                        bottom_right_hexted]
+
+        for hexcell in hexcells:
+            if hexcell != None:
+               neighborhood.append(hexcell)
+
+        if (len(neighborhood) >= 0):
+            enemies_nb = self.enemies_in_neighborhood(hexcell, neighborhood)
+
+        for enemy_nb in enemies_nb:
+            for enemy in enemies:
+                if (id(enemy_nb) == id(enemy)):
+                    return neighborhood
+                else:
+                    enemies.append(enemies_nb)
+                    self.get_neighborhood(enemy, neighborhood, enemies)
+
+
+    def just_avaliable_spaces(self,enemy):
+        (x, y) = enemy.get_position()
+
+        right_hexted = self.get_hexcell_from_position(x + 20, y)
+        left_hexted = self.get_hexcell_from_position(x - 20, y)
+        top_left_hexted = self.get_hexcell_from_position(x - 10, y - 20)
+        top_right_hexted = self.get_hexcell_from_position(x + 10, y - 20)
+        bottom_left_hexted = self.get_hexcell_from_position(x - 10, y + 20)
+        bottom_right_hexted = self.get_hexcell_from_position(x + 10, y + 20)
+
+        neighborhood = [right_hexted, left_hexted, top_left_hexted, top_right_hexted, bottom_left_hexted,
+                        bottom_right_hexted]
+
+        white_spaces = self.get_white_spaces_in_neighborhood(neighborhood)
+
+        return white_spaces
+
+    def get_white_spaces_in_neighborhood(self,neighborhood):
+        whites = []
+        for neighbor in neighborhood:
+            if neighbor.get_color() == u.WHITE:
+                whites.append(neighbor)
+        return whites
+
+    def enemies_in_neighborhood(self, hexcell ,neighborhood):
+        enemies = []
+        for neighbor in neighborhood:
+            if self.verify_if_neighbor_is_an_enemy(hexcell, neighbor):
+                enemies.append(neighbor)
+        return enemies
 
     def show_highlight(self,neighborhood):
         for hexted in neighborhood:
@@ -107,6 +156,7 @@ class Grid():
                     hexcell.back_to_white()
                 hexcell.create_circle(screen)
         pygame.display.flip()
+        self.nbs = []
 
     def get_hexcell_from_position(self, x , y):
         for i, array in enumerate(self.grid):
@@ -117,9 +167,14 @@ class Grid():
 
     def change_hexcell_position(self,hexcell, other_hexcell):
         if other_hexcell.get_color() == u.WHITE:
-            self.nbs = self.get_neighborhood(hexcell)
+            self.nbs = self.get_neighborhood(hexcell, [], [])
             if other_hexcell in self.nbs:
                 pos = hexcell.get_position()
                 hexcell.set_position(other_hexcell.get_position())
                 other_hexcell.set_position(pos)
 
+    def verify_if_neighbor_is_an_enemy(self, hexcell: HexCell, neighbor_hexcell: HexCell):
+        if neighbor_hexcell != None and neighbor_hexcell.get_color() != u.WHITE and neighbor_hexcell.get_color() != hexcell.get_color():
+            return True
+        else:
+            return False

@@ -92,7 +92,8 @@ while not done:
                 hexcell = grid.verify_position_in_matrix(x, y)
                 if hexcell != None:
                     if hexcell.get_color() != u.WHITE:
-                        grid.show_highlight(grid.get_neighborhood(hexcell))
+                        neighborhood = grid.get_neighborhood(hexcell, [], [])
+                        grid.show_highlight(neighborhood)
                         grid.draw_grid(screen)
 
         if event.type == pygame.MOUSEBUTTONUP:
