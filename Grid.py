@@ -6,7 +6,7 @@ from HexCell import HexCell
 
 class Grid():
     def __init__(self):
-        self.selectedsHex = []
+        self.nbs = []
         self.grid = np.array([
             # Ponta verde #
             [HexCell(250, 90, 10, u.GREEN)],
@@ -17,13 +17,13 @@ class Grid():
             # =========== #
             [HexCell(130, 170, 10, u.WHITE), HexCell(150, 170, 10, u.WHITE), HexCell(170, 170, 10, u.WHITE),
              HexCell(190, 170, 10, u.WHITE), HexCell(210, 170, 10, u.WHITE), HexCell(230, 170, 10, u.WHITE),
-             HexCell(250, 170, 10, u.WHITE), HexCell(270, 170, 10, u.WHITE), HexCell(290, 170, 10, u.GREEN),
+             HexCell(250, 170, 10, u.WHITE), HexCell(270, 170, 10, u.WHITE), HexCell(290, 170, 10, u.WHITE),
              HexCell(310, 170, 10, u.WHITE), HexCell(330, 170, 10, u.WHITE), HexCell(350, 170, 10, u.WHITE),
              HexCell(370, 170, 10, u.WHITE)],
 
             [HexCell(140, 190, 10, u.WHITE), HexCell(160, 190, 10, u.WHITE), HexCell(180, 190, 10, u.WHITE),
              HexCell(200, 190, 10, u.WHITE), HexCell(220, 190, 10, u.WHITE), HexCell(240, 190, 10, u.WHITE),
-             HexCell(260, 190, 10, u.WHITE), HexCell(280, 190, 10, u.GREEN), HexCell(300, 190, 10, u.WHITE),
+             HexCell(260, 190, 10, u.WHITE), HexCell(280, 190, 10, u.WHITE), HexCell(300, 190, 10, u.WHITE),
              HexCell(320, 190, 10, u.WHITE), HexCell(340, 190, 10, u.WHITE), HexCell(360, 190, 10, u.WHITE)],
 
             [HexCell(150, 210, 10, u.WHITE), HexCell(170, 210, 10, u.WHITE), HexCell(190, 210, 10, u.WHITE),
@@ -74,7 +74,7 @@ class Grid():
     def verify_inside_circle(self,x,y,a,b,r):
         return (x - a) * (x - a) + (y - b) * (y - b) < r*r
 
-    def verify_position_in_matrix(self,x,y,event):
+    def verify_position_in_matrix(self,x,y):
         for i, array in enumerate(self.grid):
             for j, hexcell in enumerate(array):
                 (a,b) = hexcell.get_position()
@@ -116,8 +116,10 @@ class Grid():
                     return hexcell
 
     def change_hexcell_position(self,hexcell, other_hexcell):
-        pos = hexcell.get_position()
-        hexcell.set_position(other_hexcell.get_position())
-        other_hexcell.set_position(pos)
-        print("aqui")
+        if other_hexcell.get_color() == u.WHITE:
+            self.nbs = self.get_neighborhood(hexcell)
+            if other_hexcell in self.nbs:
+                pos = hexcell.get_position()
+                hexcell.set_position(other_hexcell.get_position())
+                other_hexcell.set_position(pos)
 

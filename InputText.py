@@ -21,6 +21,9 @@ class InputText:
         self.color = color
         pygame.display.flip()
 
+    def get_input_text_rect(self):
+        return self.rect
+
     def get_use_input(self,player,text):
         self.user_input((player,text))
 
