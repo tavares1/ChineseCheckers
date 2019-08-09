@@ -6,6 +6,9 @@ from InputText import InputText
 import utils as u
 import random
 
+hexcells = []
+MOUSE_LEFT = 1
+MOUSE_RIGHT = 3
 
 # Inicializando o pygame, setando o tamanho da tela.
 pygame.display.init()
@@ -58,15 +61,39 @@ while not done:
         if event.type == pygame.QUIT:
             done = True
         if event.type == pygame.MOUSEBUTTONDOWN:
-            input_text.handle_event(event)
-            if send_mensage_button_rect.collidepoint(event.pos):
-                enviar_mensagem(input_para_chatbox)
-            position_mouse = pygame.mouse.get_pos()
-            print(position_mouse)
-            x = position_mouse[0]
-            y = position_mouse[1]
-            grid.verify_position_in_matrix(x, y, screen)
+            if event.button == MOUSE_LEFT:
+                input_text.handle_event(event)
+                if send_mensage_button_rect.collidepoint(event.pos):
+                    enviar_mensagem(input_para_chatbox)
+
+                #Recebendo ponteiro do mouse
+                position_mouse = pygame.mouse.get_pos()
+                x = position_mouse[0]
+                y = position_mouse[1]
+
+                hexcell = grid.verify_position_in_matrix(x, y, event)
+                hexcells.append(hexcell)
+                print(hexcells)
+                if len(hexcells) == 2:
+                    grid.change_hexcell_position(hexcells[0],hexcells[1])
+                    hexcells = []
+                grid.draw_grid(screen)
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == MOUSE_RIGHT:
+                position_mouse = pygame.mouse.get_pos()
+                x = position_mouse[0]
+                y = position_mouse[1]
+                hexcell = grid.verify_position_in_matrix(x, y, event)
+                grid.show_highlight(grid.get_neighborhood(hexcell))
+                grid.draw_grid(screen)
+
+        if event.type == pygame.MOUSEBUTTONUP:
+            if event.button == MOUSE_RIGHT:
+                grid.remove_highlight(screen)
+
         if event.type == pygame.KEYDOWN:
+
             input_text.handle_event(event)
             input_para_chatbox = input_text.draw(screen)
             pygame.display.flip()

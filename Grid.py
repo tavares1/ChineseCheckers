@@ -1,5 +1,4 @@
 import pygame
-import time
 import utils as u
 import numpy as np
 from HexCell import HexCell
@@ -7,6 +6,7 @@ from HexCell import HexCell
 
 class Grid():
     def __init__(self):
+        self.selectedsHex = []
         self.grid = np.array([
             # Ponta verde #
             [HexCell(250, 90, 10, u.GREEN)],
@@ -17,13 +17,13 @@ class Grid():
             # =========== #
             [HexCell(130, 170, 10, u.WHITE), HexCell(150, 170, 10, u.WHITE), HexCell(170, 170, 10, u.WHITE),
              HexCell(190, 170, 10, u.WHITE), HexCell(210, 170, 10, u.WHITE), HexCell(230, 170, 10, u.WHITE),
-             HexCell(250, 170, 10, u.WHITE), HexCell(270, 170, 10, u.WHITE), HexCell(290, 170, 10, u.WHITE),
+             HexCell(250, 170, 10, u.WHITE), HexCell(270, 170, 10, u.WHITE), HexCell(290, 170, 10, u.GREEN),
              HexCell(310, 170, 10, u.WHITE), HexCell(330, 170, 10, u.WHITE), HexCell(350, 170, 10, u.WHITE),
              HexCell(370, 170, 10, u.WHITE)],
 
             [HexCell(140, 190, 10, u.WHITE), HexCell(160, 190, 10, u.WHITE), HexCell(180, 190, 10, u.WHITE),
              HexCell(200, 190, 10, u.WHITE), HexCell(220, 190, 10, u.WHITE), HexCell(240, 190, 10, u.WHITE),
-             HexCell(260, 190, 10, u.WHITE), HexCell(280, 190, 10, u.WHITE), HexCell(300, 190, 10, u.WHITE),
+             HexCell(260, 190, 10, u.WHITE), HexCell(280, 190, 10, u.GREEN), HexCell(300, 190, 10, u.WHITE),
              HexCell(320, 190, 10, u.WHITE), HexCell(340, 190, 10, u.WHITE), HexCell(360, 190, 10, u.WHITE)],
 
             [HexCell(150, 210, 10, u.WHITE), HexCell(170, 210, 10, u.WHITE), HexCell(190, 210, 10, u.WHITE),
@@ -74,10 +74,50 @@ class Grid():
     def verify_inside_circle(self,x,y,a,b,r):
         return (x - a) * (x - a) + (y - b) * (y - b) < r*r
 
-    def verify_position_in_matrix(self,x,y,screen):
-        for array in self.grid:
-            for hexcell in array:
+    def verify_position_in_matrix(self,x,y,event):
+        for i, array in enumerate(self.grid):
+            for j, hexcell in enumerate(array):
                 (a,b) = hexcell.get_position()
                 if self.verify_inside_circle(x, y, a, b, 10) and hexcell.valid:
-                    hexcell.change_color()
-                    self.draw_grid(screen)
+                        return hexcell
+
+
+    def get_neighborhood(self,hexcell):
+        (x,y) = hexcell.get_position()
+        print(x,y)
+
+        right_hexted = self.get_hexcell_from_position(x+20,y)
+        left_hexted = self.get_hexcell_from_position(x-20,y)
+        top_left_hexted = self.get_hexcell_from_position(x - 10, y - 20)
+        top_right_hexted = self.get_hexcell_from_position(x + 10, y - 20)
+        bottom_left_hexted = self.get_hexcell_from_position(x - 10, y + 20)
+        bottom_right_hexted = self.get_hexcell_from_position(x + 10, y + 20)
+
+        return right_hexted,left_hexted,top_left_hexted,top_right_hexted,bottom_left_hexted,bottom_right_hexted
+
+    def show_highlight(self,neighborhood):
+        for hexted in neighborhood:
+            if hexted != None and hexted.get_color() == u.WHITE:
+                hexted.highlight()
+
+    def remove_highlight(self, screen ):
+        for array in self.grid:
+            for hexcell in array:
+                if hexcell.get_color() == (255,255,0):
+                    hexcell.back_to_white()
+                hexcell.create_circle(screen)
+        pygame.display.flip()
+
+    def get_hexcell_from_position(self, x , y):
+        for i, array in enumerate(self.grid):
+            for j, hexcell in enumerate(array):
+                (a,b) = hexcell.get_position()
+                if (a == x and b == y):
+                    return hexcell
+
+    def change_hexcell_position(self,hexcell, other_hexcell):
+        pos = hexcell.get_position()
+        hexcell.set_position(other_hexcell.get_position())
+        other_hexcell.set_position(pos)
+        print("aqui")
+
