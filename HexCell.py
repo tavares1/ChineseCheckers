@@ -2,12 +2,13 @@ import pygame
 
 
 class HexCell:
-    def __init__(self, x, y, radius, color, valid = True):
+    def __init__(self, x, y, radius, color, valid = True, moved = False):
         self.x = x
         self.y = y
         self.radius = radius
         self.color = color
         self.valid = valid
+        self.moved = moved
 
 
     def get_position(self):

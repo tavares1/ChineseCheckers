@@ -81,7 +81,6 @@ class Grid():
                 if self.verify_inside_circle(x, y, a, b, 10) and hexcell.valid:
                         return hexcell
 
-
     def get_neighborhood(self,hexcell):
         (x,y) = hexcell.get_position()
         print(x,y)
@@ -96,20 +95,24 @@ class Grid():
         neighborhood = right_hexted,left_hexted,top_left_hexted,top_right_hexted,bottom_left_hexted,bottom_right_hexted
         
         hexcells = []
-
         for neighbor in neighborhood:
             if neighbor is not None:
                 hexcells.append(neighbor)
-        
+
+        white_spaces = self.get_white_spaces_in_neighborhood(hexcells)
+
+        for w in white_spaces:
+            hexcells.append(w)
         if (len(hexcells) >= 0):
             enemies_nb = self.enemies_in_neighborhood(hexcell, hexcells)
-        
+            
         if (len(enemies_nb) >= 0):
             for enemy in enemies_nb:
-                w_s = self.just_avaliable_spaces(enemy)
-                for w in w_s:
-                    hexcells.append(w) 
-        return hexcells
+                if enemy.moved:
+                    w_s = self.just_avaliable_spaces(enemy)
+                    for w in w_s:
+                        hexcells.append(w) 
+        return hexcells 
     
     def get_white_spaces_in_neighborhood(self,neighborhood):
         whites = []
@@ -174,6 +177,7 @@ class Grid():
             if other_hexcell in self.nbs:
                 pos = hexcell.get_position()
                 hexcell.set_position(other_hexcell.get_position())
+                hexcell.moved = True
                 other_hexcell.set_position(pos)
     
     def verify_if_neighbor_is_not_white(self, hexcell: HexCell, neighbor_hexcell: HexCell):
