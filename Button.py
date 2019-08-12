@@ -18,4 +18,3 @@ class Button():
         screen.blit(render_font, (font_position_x, font_position_y))
         pygame.display.flip()
         return rect
-

@@ -78,7 +78,6 @@ while not done:
                             hexcells.append(hexcell)
                         if hexcell.get_color() == u.WHITE and len(hexcells) > 0:
                             hexcells.append(hexcell)
-                    print(hexcells)
                     if len(hexcells) == 2:
                         grid.change_hexcell_position(hexcells[0],hexcells[1])
                         hexcells = []
@@ -90,10 +89,10 @@ while not done:
                 x = position_mouse[0]
                 y = position_mouse[1]
                 hexcell = grid.verify_position_in_matrix(x, y)
-                if hexcell != None:
-                    if hexcell.get_color() != u.WHITE:
-                        grid.show_highlight(grid.get_neighborhood(hexcell))
-                        grid.draw_grid(screen)
+                if hexcell != None and hexcell.get_color() != u.WHITE:
+                    neighborhood = grid.get_neighborhood(hexcell)
+                    grid.show_highlight(neighborhood)
+                    grid.draw_grid(screen)
 
         if event.type == pygame.MOUSEBUTTONUP:
             if event.button == MOUSE_RIGHT:

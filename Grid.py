@@ -93,7 +93,60 @@ class Grid():
         bottom_left_hexted = self.get_hexcell_from_position(x - 10, y + 20)
         bottom_right_hexted = self.get_hexcell_from_position(x + 10, y + 20)
 
-        return right_hexted,left_hexted,top_left_hexted,top_right_hexted,bottom_left_hexted,bottom_right_hexted
+        neighborhood = right_hexted,left_hexted,top_left_hexted,top_right_hexted,bottom_left_hexted,bottom_right_hexted
+        
+        hexcells = []
+
+        for neighbor in neighborhood:
+            if neighbor is not None:
+                hexcells.append(neighbor)
+        
+        if (len(hexcells) >= 0):
+            enemies_nb = self.enemies_in_neighborhood(hexcell, hexcells)
+        
+        if (len(enemies_nb) >= 0):
+            for enemy in enemies_nb:
+                w_s = self.just_avaliable_spaces(enemy)
+                for w in w_s:
+                    hexcells.append(w) 
+        return hexcells
+    
+    def get_white_spaces_in_neighborhood(self,neighborhood):
+        whites = []
+        for neighbor in neighborhood:
+            if neighbor != None:
+                if neighbor.get_color() == u.WHITE:
+                    whites.append(neighbor)
+        return whites
+
+    def enemies_in_neighborhood(self, hexcell ,neighborhood):
+        enemies = []
+        for neighbor in neighborhood:
+            if self.verify_if_neighbor_is_not_white(hexcell, neighbor):
+                enemies.append(neighbor)
+        return enemies
+
+    def just_avaliable_spaces(self,enemy):
+        (x, y) = enemy.get_position()
+
+        right_hexted = self.get_hexcell_from_position(x + 20, y)
+        left_hexted = self.get_hexcell_from_position(x - 20, y)
+        top_left_hexted = self.get_hexcell_from_position(x - 10, y - 20)
+        top_right_hexted = self.get_hexcell_from_position(x + 10, y - 20)
+        bottom_left_hexted = self.get_hexcell_from_position(x - 10, y + 20)
+        bottom_right_hexted = self.get_hexcell_from_position(x + 10, y + 20)
+
+        neighborhood = [right_hexted, left_hexted, top_left_hexted, top_right_hexted, bottom_left_hexted,
+                        bottom_right_hexted]
+
+        filtred_nb = []
+        for nb in neighborhood:
+            if nb is not None:
+                filtred_nb.append(nb)
+
+        white_spaces = self.get_white_spaces_in_neighborhood(filtred_nb)
+    
+        return white_spaces
 
     def show_highlight(self,neighborhood):
         for hexted in neighborhood:
@@ -122,4 +175,9 @@ class Grid():
                 pos = hexcell.get_position()
                 hexcell.set_position(other_hexcell.get_position())
                 other_hexcell.set_position(pos)
-
+    
+    def verify_if_neighbor_is_not_white(self, hexcell: HexCell, neighbor_hexcell: HexCell):
+        if neighbor_hexcell != None and neighbor_hexcell.get_color() != u.WHITE:
+            return True
+        else:
+            return False    
