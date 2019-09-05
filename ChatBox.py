@@ -2,31 +2,20 @@ import pygame
 import utils as u
 
 class ChatBox:
+    chat = []
+
     def __init__(self,screen, x, y, width, height, color):
         self.screen = screen
         self.width = width
         self.rect = pygame.draw.rect(screen, color, (x,y, width,height))
         pygame.display.flip()
         self.font = pygame.font.SysFont("Corbel", 15)
-        self.chatarray = []
-        self.texts = []
-
-    def add_text(self,player,text):
-        if len(self.chatarray) == 11:
-            self.chatarray.pop(0)
-
-        self.chatarray.append((player,text))
-
-    def get_all_texts(self):
-        return self.chatarray
-
-    def reset_interface(self):
-        self.screen.fill(u.WHITE)
 
     def update_chat_array_ui(self):
-        for index,value in enumerate(self.chatarray):
+
+        for index,value in enumerate(self.chat):
             player,text = value
-            if player == 1:
+            if player == "RED":
                 # text vem do array e o color tbm.
                 text = (f"Jogador Vermelho: {text}")
                 render_font = self.font.render(text, True, u.RED)

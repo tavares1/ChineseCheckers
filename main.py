@@ -4,46 +4,17 @@ from Button import Button
 from ChatBox import ChatBox
 from InputText import InputText
 import utils as u
-import random
-import time
-import socket
-import select
-import sys
-from threading import *
+import Pyro4
 
-## Connection ##
+######## CONNECTION WITH RPC ##############
 
-def client():
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.connect(('127.0.0.1', 3000))
+ns = Pyro4.locateNS()
+uri = ns.lookup("obj")
+o = Pyro4.Proxy(uri)
 
-    while True:
+o.join_server()
 
-        # maintains a list of possible input streams
-        sockets_list = [sys.stdin, server]
-
-        read_sockets, write_socket, error_socket = select.select(sockets_list, [], [])
-
-        for socks in read_sockets:
-            if socks == server:
-                message = socks.recv(2048)
-                if message != ("b''"):
-                    print(message)
-            else:
-                message = sys.stdin.readline()
-                server.send(bytes(message,"utf-8"))
-                sys.stdout.write("<You>")
-                sys.stdout.write(message)
-                sys.stdout.flush()
-
-
-    server.close()
-
-
-Thread(target=client).start()
-
-## Interface ##
-
+####### INTERFACE ########
 
 hexcells = []
 MOUSE_LEFT = 1
@@ -87,10 +58,11 @@ send_mensage_button_rect = send_mensage_button.draw_button(screen, 920, 490, 200
 input_para_chatbox = ""
 
 
+
 def enviar_mensagem(input):
     input_text.clean_input()
     pygame.display.flip()
-    chat_box.add_text(0, input)
+    chat_box.chat = o.get_mensages()
     chat_box.update_chat_array_ui()
 
 
@@ -98,15 +70,21 @@ def enviar_mensagem(input):
 
 done = False
 while not done:
+    chat_box.chat = o.get_mensages()
+    chat_box.update_chat_array_ui()
     for event in pygame.event.get():
+
         if event.type == pygame.QUIT:
             done = True
+
         if event.type == pygame.MOUSEBUTTONDOWN:
+
             if event.button == MOUSE_LEFT:
                 if input_text.get_input_text_rect().collidepoint(event.pos):
                     input_text.handle_event(event)
                 if send_mensage_button_rect.collidepoint(event.pos):
                     enviar_mensagem(input_para_chatbox)
+                    o.set_new_mensage(input_para_chatbox)
                 else:
                     # Recebendo ponteiro do mouse
                     position_mouse = pygame.mouse.get_pos()
@@ -143,3 +121,6 @@ while not done:
             input_text.handle_event(event)
             input_para_chatbox = input_text.draw(screen)
             pygame.display.flip()
+
+        if event.type == pygame.QUIT:
+            o.exit_server()

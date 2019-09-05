@@ -1,59 +1,38 @@
-import socket
-from threading import *
+import Pyro4
 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+@Pyro4.expose
+class ChineseCheckers():
+    mensages = []
+    player_color = "RED"
+    players = []
 
+    def get_mensages(self):
+        if len(self.mensages) == 11:
+            self.mensages.pop(0)
+        return self.mensages
 
-server.bind(("127.0.0.1", 3000))
+    def set_new_mensage(self, mensage):
+        print(f"mensage from:{self.player_color} : {mensage}")
+        self.mensages.append((self.player_color, mensage))
 
+    def join_server(self):
+        if len(self.players) == 0:
+            self.players.append("RED")
+        elif self.players[0] == "GREEN":
+            self.players.insert(0,"RED")
+        else:
+            self.players.append("GREEN")
+            self.player_color = "GREEN"
+        self.set_new_mensage("conectou-se")
 
-server.listen(100)
-
-list_of_clients = []
-
-
-def clientthread(conn, addr):
-    conn.send(bytes("Welcome to this chatroom!","utf-8"))
-    while True:
-        try:
-            message = conn.recv(2048)
-            if message != None :
-
-                message_to_send = (f"<{addr[0]}>{message}")
-                broadcast(message_to_send, conn)
-
-            else:
-                remove(conn)
-
-        except:
-            continue
-
-
-
-def broadcast(message, connection):
-    for clients in list_of_clients:
-        if clients != connection:
-            try:
-                clients.send(bytes(message,"utf-8"))
-            except:
-                clients.close()
-
-                # if the link is broken, we remove the client
+    def exit_server(self):
+        self.set_new_mensage("desconectou!")
+        self.players.remove(self.player_color)
 
 
-def remove(connection):
-    if connection in list_of_clients:
-        list_of_clients.remove(connection)
+daemon = Pyro4.Daemon()
+uri = daemon.register(ChineseCheckers)
+ns = Pyro4.locateNS()
+ns.register("obj",uri)
 
-
-while True:
-    print("Waiting for connections...")
-    conn, addr = server.accept()
-    list_of_clients.append(conn)
-    print(list_of_clients)
-    print(addr[0] + " connected")
-    Thread(target=clientthread, args=(conn,addr)).start()
-
-conn.close()
-server.close()
+daemon.requestLoop()
